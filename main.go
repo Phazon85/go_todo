@@ -1,31 +1,85 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
+
+	_ "github.com/lib/pq"
 )
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "Voltage13-2"
+	dbname   = "todo"
+)
+
+// API holds postgres DB connection info
+type API struct {
+	DB *sql.DB
+}
+
 type todo struct {
-	Message string
-	ID      int
+	ID    string `json:"ID"`
+	Body  string `json:"body"`
+	Title string `json:"title"`
 }
 
-var todos = []*todo{
-	&todo{
-		Message: "Hello",
-		ID:      0,
-	},
-}
+// var todos = []*todo{
+// 	&todo{
+// 		Body:  "Hello",
+// 		Title: "test",
+// 	},
+// }
 
-func getTodo(w http.ResponseWriter, r *http.Request) {
+func (api *API) getTodo(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Incoming GET request on: %s", r.URL.Path)
-	json.NewEncoder(w).Encode(todos)
+
+	// // Single select statement
+	// newTodo := &todo{}
+	// value := r.Header.Get("ID")
+	// singleStatment := `
+	// SELECT id, title, body FROM todo_list WHERE id=$1;
+	// `
+	// row := api.DB.QueryRow(singleStatment, value)
+	// switch err := row.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body); err {
+	// case sql.ErrNoRows:
+	// 	log.Printf("Error: No rows returned")
+	// case nil:
+	// 	fmt.Println(newTodo.ID, newTodo.Title, newTodo.Body)
+	// default:
+	// 	log.Printf("Error with GET sql query: %s", err.Error())
+	// }
+
+	// Get all todos
+	allTodo := []*todo{}
+	multiStatement := `SELECT id, title, body FROM todo_list;
+		`
+	rows, err := api.DB.Query(multiStatement)
+	if err != nil {
+		log.Printf("Error with GET multirow sql query: %s", err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		newTodo := &todo{}
+		err = rows.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body)
+		if err != nil {
+			log.Printf("Error scanning multi SQL rows into newTodo: %s", err.Error())
+		}
+		allTodo = append(allTodo, newTodo)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Printf("Error during iterating through sql reponse: %s", err.Error())
+	}
+	json.NewEncoder(w).Encode(allTodo)
 }
 
-func postTodo(w http.ResponseWriter, r *http.Request) {
+func (api *API) postTodo(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Incoming POST request on: %s", r.URL.Path)
 	newTodo := &todo{}
 	err := json.NewDecoder(r.Body).Decode(newTodo)
@@ -33,54 +87,72 @@ func postTodo(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error decoding post Todo: %s", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	newTodo.ID = len(todos)
-	todos = append(todos, newTodo)
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(todos)
-}
+	sqlStatement := `
+	INSERT INTO todo_list (title, body) 
+	VALUES ($1, $2);`
 
-func delTodo(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Incoming DELETE request on: %s", r.URL.Path)
-	for i, v := range todos {
-		if r.Header.Get("ID") == strconv.Itoa(v.ID) {
-			todos = todos[:i+copy(todos[i:], todos[i+1:])]
-		}
-	}
-	w.WriteHeader(http.StatusOK)
-}
-
-func putTodo(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Incoming PUT request on: %s", r.URL.Path)
-	newTodo := &todo{}
-	err := json.NewDecoder(r.Body).Decode(newTodo)
+	_, err = api.DB.Exec(sqlStatement, newTodo.Title, newTodo.Body)
 	if err != nil {
-		log.Printf("Error decoding put Todo: %s", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		log.Printf("Error performing INSERT statement: %s", err.Error())
 	}
-	for i, v := range todos {
-		if r.Header.Get("ID") == strconv.Itoa(v.ID) {
-			todos[i].Message = newTodo.Message
-		}
-	}
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 }
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+// func delTodo(w http.ResponseWriter, r *http.Request) {
+// 	log.Printf("Incoming DELETE request on: %s", r.URL.Path)
+// 	for i, v := range todos {
+// 		if r.Header.Get("ID") == strconv.Itoa(v.ID) {
+// 			todos = todos[:i+copy(todos[i:], todos[i+1:])]
+// 		}
+// 	}
+// 	w.WriteHeader(http.StatusOK)
+// }
+
+// func putTodo(w http.ResponseWriter, r *http.Request) {
+// 	log.Printf("Incoming PUT request on: %s", r.URL.Path)
+// 	newTodo := &todo{}
+// 	err := json.NewDecoder(r.Body).Decode(newTodo)
+// 	if err != nil {
+// 		log.Printf("Error decoding put Todo: %s", err.Error())
+// 		w.WriteHeader(http.StatusBadRequest)
+// 	}
+// 	for i, v := range todos {
+// 		if r.Header.Get("ID") == strconv.Itoa(v.ID) {
+// 			todos[i].Message = newTodo.Message
+// 		}
+// 	}
+// 	w.WriteHeader(http.StatusOK)
+// }
+
+func (api *API) rootHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		getTodo(w, r)
+		api.getTodo(w, r)
 	case "POST":
-		postTodo(w, r)
-	case "DELETE":
-		delTodo(w, r)
-	case "PUT":
-		putTodo(w, r)
+		api.postTodo(w, r)
+	// case "DELETE":
+	// 	delTodo(w, r)
+	// case "PUT":
+	// 	putTodo(w, r)
 	default:
 		fmt.Fprintf(w, "Unknown method")
 	}
 }
 
 func main() {
-	http.HandleFunc("/todo", rootHandler)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		log.Printf("Error opening SQL db: %s", err.Error())
+	}
+	err = db.Ping()
+	if err != nil {
+		log.Printf("Error pingng SQL db: %s", err.Error())
+	}
+	api := &API{
+		DB: db,
+	}
+	http.HandleFunc("/todo", api.rootHandler)
 	http.ListenAndServe(":8080", nil)
 }
