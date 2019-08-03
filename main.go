@@ -116,11 +116,6 @@ func (api *API) putTodo(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error decoding put Todo: %s", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	// for i, v := range todos {
-	// 	if r.Header.Get("ID") == strconv.Itoa(v.ID) {
-	// 		todos[i].Message = newTodo.Message
-	// 	}
-	// }
 	_, err = api.DB.Exec(updateStatement, r.Header.Get("ID"), &updateTodo.Title, &updateTodo.Body)
 	if err != nil {
 		log.Printf("Error updating Todo: %s", err.Error())
@@ -145,6 +140,7 @@ func (api *API) rootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// setting up connection to postgres DB
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
@@ -158,6 +154,8 @@ func main() {
 	api := &API{
 		DB: db,
 	}
+
+	// starting HTTP server
 	http.HandleFunc("/todo", api.rootHandler)
 	http.ListenAndServe(":8080", nil)
 }
