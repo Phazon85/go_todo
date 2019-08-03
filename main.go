@@ -29,13 +29,6 @@ type todo struct {
 	Title string `json:"title"`
 }
 
-// var todos = []*todo{
-// 	&todo{
-// 		Body:  "Hello",
-// 		Title: "test",
-// 	},
-// }
-
 func (api *API) getTodo(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Incoming GET request on: %s", r.URL.Path)
 
@@ -98,31 +91,43 @@ func (api *API) postTodo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-// func delTodo(w http.ResponseWriter, r *http.Request) {
-// 	log.Printf("Incoming DELETE request on: %s", r.URL.Path)
-// 	for i, v := range todos {
-// 		if r.Header.Get("ID") == strconv.Itoa(v.ID) {
-// 			todos = todos[:i+copy(todos[i:], todos[i+1:])]
-// 		}
-// 	}
-// 	w.WriteHeader(http.StatusOK)
-// }
+func (api *API) delTodo(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Incoming DELETE request on: %s", r.URL.Path)
+	deleteStatment := `
+	DELETE FROM todo_list
+	WHERE id = $1;`
+	value := r.Header.Get("ID")
+	_, err := api.DB.Exec(deleteStatment, value)
+	if err != nil {
+		log.Printf("Error deleting record: %s", err.Error())
+	}
+	w.WriteHeader(http.StatusOK)
+}
 
-// func putTodo(w http.ResponseWriter, r *http.Request) {
-// 	log.Printf("Incoming PUT request on: %s", r.URL.Path)
-// 	newTodo := &todo{}
-// 	err := json.NewDecoder(r.Body).Decode(newTodo)
-// 	if err != nil {
-// 		log.Printf("Error decoding put Todo: %s", err.Error())
-// 		w.WriteHeader(http.StatusBadRequest)
-// 	}
-// 	for i, v := range todos {
-// 		if r.Header.Get("ID") == strconv.Itoa(v.ID) {
-// 			todos[i].Message = newTodo.Message
-// 		}
-// 	}
-// 	w.WriteHeader(http.StatusOK)
-// }
+func (api *API) putTodo(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Incoming PUT request on: %s", r.URL.Path)
+	updateStatement := `
+	UPDATE todo_list
+	SET title = $2, body = $3
+	WHERE id = $1;`
+	updateTodo := &todo{}
+	err := json.NewDecoder(r.Body).Decode(updateTodo)
+	if err != nil {
+		log.Printf("Error decoding put Todo: %s", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	// for i, v := range todos {
+	// 	if r.Header.Get("ID") == strconv.Itoa(v.ID) {
+	// 		todos[i].Message = newTodo.Message
+	// 	}
+	// }
+	_, err = api.DB.Exec(updateStatement, r.Header.Get("ID"), &updateTodo.Title, &updateTodo.Body)
+	if err != nil {
+		log.Printf("Error updating Todo: %s", err.Error())
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
 
 func (api *API) rootHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -130,10 +135,10 @@ func (api *API) rootHandler(w http.ResponseWriter, r *http.Request) {
 		api.getTodo(w, r)
 	case "POST":
 		api.postTodo(w, r)
-	// case "DELETE":
-	// 	delTodo(w, r)
-	// case "PUT":
-	// 	putTodo(w, r)
+	case "DELETE":
+		api.delTodo(w, r)
+	case "PUT":
+		api.putTodo(w, r)
 	default:
 		fmt.Fprintf(w, "Unknown method")
 	}
