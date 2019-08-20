@@ -13,6 +13,11 @@ func TestNewConfig(t *testing.T) {
 	assert.NotNil(t, cfg)
 }
 
-// func TestLoadConfig(t *testing.T) {
-// 	_ = NewConfig("")
-// }
+func TestLoadConfig(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	_ = NewConfig("")
+}
