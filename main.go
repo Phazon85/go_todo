@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/phazon85/go_todo/services/config"
+	"github.com/phazon85/go_todo/services/postgres"
 
 	_ "github.com/lib/pq"
 )
@@ -9,25 +10,6 @@ import (
 const (
 	configFile = "dev.yaml"
 )
-
-// const (
-// 	host     = "localhost"
-// 	port     = 5432
-// 	user     = "postgres"
-// 	password = "Voltage13-2"
-// 	dbname   = "todo"
-// )
-
-// // API holds postgres DB connection info
-// type API struct {
-// 	DB *sql.DB
-// }
-
-// type todo struct {
-// 	ID    string `json:"ID"`
-// 	Body  string `json:"body"`
-// 	Title string `json:"title"`
-// }
 
 // func (api *API) getTodo(w http.ResponseWriter, r *http.Request) {
 // 	log.Printf("Incoming GET request on: %s", r.URL.Path)
@@ -146,5 +128,6 @@ func main() {
 	// http.ListenAndServe(":8080", nil)
 
 	config := config.NewConfig(configFile)
+	database := postgres.DBInit(config)
 
 }
