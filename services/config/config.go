@@ -9,30 +9,30 @@ import (
 
 // Config is the database connection info
 type Config struct {
-	Service *PostgresConfig `yaml: postgres`
+	Service *PostgresConfig `yaml:"postgres"`
 }
 
 // PostgresConfig contains the info for connecting to a database
 type PostgresConfig struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	Name     string
-	DB       string
+	Host     string `yaml:"host"`
+	Port     int64  `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Name     string `yaml:"name"`
+	DB       string `yaml:"db"`
 }
 
 // NewConfig loads the info from the config file
 func NewConfig(file string) *Config {
 	cfg := &Config{}
 	if err := load(cfg, file); err != nil {
-		panic(fmt.Sprintf("Error loading config from file: %s", err.Error()))
+		panic(fmt.Sprintf("failed to load config file %s", err.Error()))
 	}
 	return cfg
 }
 
 // LoadValues takes the
-func LoadValues(config interface{}, fname string) error {
+func load(config interface{}, fname string) error {
 	data, err := ioutil.ReadFile(fname)
 	if err != nil {
 		return err
