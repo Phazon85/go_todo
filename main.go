@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/phazon85/go_todo/services/config"
-	"github.com/phazon85/go_todo/services/postgres"
+	"github.com/gorilla/mux"
+	"fmt"
+
+	"github.com/phazon85/go_todo/services"
 
 	_ "github.com/lib/pq"
 )
@@ -10,6 +12,26 @@ import (
 const (
 	configFile = "dev.yaml"
 )
+
+//Todo holds json fields
+type Todo struct {
+	ID    string `json:"ID"`
+	Title string `json:"Title"`
+	Body  string `json:"Body"`
+}
+
+func NewTodoHandler(svc services.Actions)
+
+func main() {
+
+	// // starting HTTP server
+	// http.HandleFunc("/todo", api.rootHandler)
+	// http.ListenAndServe(":8080", nil)
+	database := services.DBInit(configFile)
+	fmt.Println(services..PSQLService.AllTodos())
+	r := mux.NewRouter()
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
 
 // func (api *API) getTodo(w http.ResponseWriter, r *http.Request) {
 // 	log.Printf("Incoming GET request on: %s", r.URL.Path)
@@ -30,30 +52,6 @@ const (
 // 	// 	log.Printf("Error with GET sql query: %s", err.Error())
 // 	// }
 
-// 	// Get all todos
-// 	allTodo := []*todo{}
-// 	multiStatement := `SELECT id, title, body FROM todo_list;
-// 		`
-// 	rows, err := api.DB.Query(multiStatement)
-// 	if err != nil {
-// 		log.Printf("Error with GET multirow sql query: %s", err.Error())
-// 	}
-// 	defer rows.Close()
-// 	for rows.Next() {
-// 		newTodo := &todo{}
-// 		err = rows.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body)
-// 		if err != nil {
-// 			log.Printf("Error scanning multi SQL rows into newTodo: %s", err.Error())
-// 		}
-// 		allTodo = append(allTodo, newTodo)
-// 	}
-// 	err = rows.Err()
-// 	if err != nil {
-// 		log.Printf("Error during iterating through sql reponse: %s", err.Error())
-// 	}
-// 	json.NewEncoder(w).Encode(allTodo)
-// }
-
 // func (api *API) postTodo(w http.ResponseWriter, r *http.Request) {
 // 	log.Printf("Incoming POST request on: %s", r.URL.Path)
 // 	newTodo := &todo{}
@@ -63,8 +61,7 @@ const (
 // 		w.WriteHeader(http.StatusBadRequest)
 // 	}
 // 	sqlStatement := `
-// 	INSERT INTO todo_list (title, body)
-// 	VALUES ($1, $2);`
+// 	INSERT INTO todo_list (title, body) VALUES ($1, $2);`
 
 // 	_, err = api.DB.Exec(sqlStatement, newTodo.Title, newTodo.Body)
 // 	if err != nil {
@@ -76,8 +73,7 @@ const (
 // func (api *API) delTodo(w http.ResponseWriter, r *http.Request) {
 // 	log.Printf("Incoming DELETE request on: %s", r.URL.Path)
 // 	deleteStatment := `
-// 	DELETE FROM todo_list
-// 	WHERE id = $1;`
+// 	DELETE FROM todo_list WHERE id = $1;`
 // 	value := r.Header.Get("ID")
 // 	_, err := api.DB.Exec(deleteStatment, value)
 // 	if err != nil {
@@ -89,9 +85,7 @@ const (
 // func (api *API) putTodo(w http.ResponseWriter, r *http.Request) {
 // 	log.Printf("Incoming PUT request on: %s", r.URL.Path)
 // 	updateStatement := `
-// 	UPDATE todo_list
-// 	SET title = $2, body = $3
-// 	WHERE id = $1;`
+// 	UPDATE todo_list SET title = $2, body = $3 WHERE id = $1;`
 // 	updateTodo := &todo{}
 // 	err := json.NewDecoder(r.Body).Decode(updateTodo)
 // 	if err != nil {
@@ -105,29 +99,3 @@ const (
 
 // 	w.WriteHeader(http.StatusOK)
 // }
-
-// func (api *API) rootHandler(w http.ResponseWriter, r *http.Request) {
-// 	switch r.Method {
-// 	case "GET":
-// 		api.getTodo(w, r)
-// 	case "POST":
-// 		api.postTodo(w, r)
-// 	case "DELETE":
-// 		api.delTodo(w, r)
-// 	case "PUT":
-// 		api.putTodo(w, r)
-// 	default:
-// 		fmt.Fprintf(w, "Unknown method")
-// 	}
-// }
-
-func main() {
-
-	// // starting HTTP server
-	// http.HandleFunc("/todo", api.rootHandler)
-	// http.ListenAndServe(":8080", nil)
-
-	config := config.NewConfig(configFile)
-	database := postgres.DBInit(config)
-
-}

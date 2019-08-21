@@ -15,22 +15,23 @@ const (
 	psqlInfo   = "host=%s port=%d user=%s password=%s dbname=%s ssqlmode=disable"
 )
 
-//PSQLService contains the sql DB connection info
+//PSQLService implements the Actions interface and carries the sql connection info
 type PSQLService struct {
 	DB *sql.DB
 }
 
-// const (
-// 	allTodos   = "SELECT id, title, body FROM todo_list;"
-// 	todoByID   = "SELECT id, title, body FROM todo_list WHERE id=$1;"
-// 	createTodo = "INSERT INTO todo_list (title, body) VALUES ($1, $2)"
-// 	deleteTodo = "DELETE FROM todo_list WHERE id = $1;"
-// 	updateTodo = "UPDATE todo_list SET title = $2, body = $3 WHERE id = $1;"
-// )
+const (
+	allTodos   = "SELECT id, title, body FROM todo_list;"
+	todoByID   = "SELECT id, title, body FROM todo_list WHERE id=$1;"
+	createTodo = "INSERT INTO todo_list (title, body) VALUES ($1, $2)"
+	deleteTodo = "DELETE FROM todo_list WHERE id = $1;"
+	updateTodo = "UPDATE todo_list SET title = $2, body = $3 WHERE id = $1;"
+)
 
 // DBInit takes a config struct and returns a postgres DB connection
-func DBInit(config *config.Config) *PSQLService {
-	s := config.Service
+func DBInit(file string) *PSQLService {
+	cfg := config.NewConfig(file)
+	s := cfg.Service
 	psql := fmt.Sprintf(psqlInfo, s.Host, s.Port, s.User, s.Password, s.Name)
 	db, err := sql.Open(driverName, psql)
 	if err != nil {
@@ -45,15 +46,16 @@ func DBInit(config *config.Config) *PSQLService {
 	}
 }
 
+//AllTodos handles response to GET on /
 func (s *PSQLService) AllTodos() ([]*Todo, error) {
 	allTodo := []*Todo{}
 	rows, err := s.DB.Query(allTodos)
 	if err != nil {
-		log.Printf("Error with allTodos query: %s", err.Error)
+		log.Printf("Error with allTodos query")
 	}
 	defer rows.Close()
 	for rows.Next() {
-		newTodo := &todo{}
+		newTodo := &Todo{}
 		err = rows.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body)
 		if err != nil {
 			log.Printf("Error scanning todos to allTodos: %s", err.Error())
