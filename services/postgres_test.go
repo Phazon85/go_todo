@@ -1,4 +1,4 @@
-package postgres
+package services
 
 import (
 	"testing"
@@ -15,4 +15,8 @@ func TestDBInit(t *testing.T) {
 	config := config.NewConfig(configFile)
 	db := DBInit(config)
 	assert.NotNil(t, db)
+}
+
+func TestAllTodos(t *testing.T) {
+
 }
