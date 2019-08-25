@@ -14,7 +14,7 @@ var (
 type Actions interface {
 	AllTodos() ([]*Todo, error)
 	GetTodoByID(id string) (*Todo, error)
-	// AddTodo(todo *Todo) error
+	AddTodo(todo *Todo) error
 	// UpdateTodo(todo *Todo) error
 	// DeleteTodo(id string) error
 }
