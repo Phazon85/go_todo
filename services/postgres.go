@@ -46,7 +46,7 @@ func DBInit(file string) *PSQLService {
 	}
 }
 
-//AllTodos handles response to GET on /
+//AllTodos Gets all Todos from DB
 func (s *PSQLService) AllTodos() ([]*Todo, error) {
 	allTodo := []*Todo{}
 	rows, err := s.DB.Query(allTodos)
@@ -65,33 +65,42 @@ func (s *PSQLService) AllTodos() ([]*Todo, error) {
 	return allTodo, err
 }
 
-// func (s *PSQLService) GetTodoByID(id) (*Todo, error) {
-// 	newTodo := &Todo{}
-// 	row := s.DB.QueryRow(todoByID, id)
-// 	switch err := row.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body); err {
-// 	case sql.ErrNoRows:
-// 		return nil, err
-// 	case nil:
-// 		return newTodo, nil
-// 	default:
-// 		return nil, err
+//GetTodoByID gets single Todo by ID from DB
+func (s *PSQLService) GetTodoByID(id string) (*Todo, error) {
+	newTodo := &Todo{}
+	if id == "" {
+		return nil, ErrNoID
+	}
+	row := s.DB.QueryRow(todoByID, id)
+	switch err := row.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body); err {
+	case sql.ErrNoRows:
+		return nil, err
+	case nil:
+		return newTodo, nil
+	default:
+		return nil, err
+	}
+}
+
+func (s *PSQLService) AddTodo(todo *Todo) error {
+	_, err := s.DB.Exec(createTodo, todo.Title, todo.Body)
+	return err
+}
+
+// func (api *API) postTodo(w http.ResponseWriter, r *http.Request) {
+// 	log.Printf("Incoming POST request on: %s", r.URL.Path)
+// 	newTodo := &todo{}
+// 	err := json.NewDecoder(r.Body).Decode(newTodo)
+// 	if err != nil {
+// 		log.Printf("Error decoding post Todo: %s", err.Error())
+// 		w.WriteHeader(http.StatusBadRequest)
 // 	}
+// 	sqlStatement := `
+// 	INSERT INTO todo_list (title, body) VALUES ($1, $2);`
+
+// 	_, err = api.DB.Exec(sqlStatement, newTodo.Title, newTodo.Body)
+// 	if err != nil {
+// 		log.Printf("Error performing INSERT statement: %s", err.Error())
+// 	}
+// 	w.WriteHeader(http.StatusCreated)
 // }
-
-// 	log.Printf("Incoming GET request on: %s", r.URL.Path)
-
-// 	// // Single select statement
-// 	// newTodo := &todo{}
-// 	// value := r.Header.Get("ID")
-// 	// singleStatment := `
-// 	// SELECT id, title, body FROM todo_list WHERE id=$1;
-// 	// `
-// 	// row := api.DB.QueryRow(singleStatment, value)
-// 	// switch err := row.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body); err {
-// 	// case sql.ErrNoRows:
-// 	// 	log.Printf("Error: No rows returned")
-// 	// case nil:
-// 	// 	fmt.Println(newTodo.ID, newTodo.Title, newTodo.Body)
-// 	// default:
-// 	// 	log.Printf("Error with GET sql query: %s", err.Error())
-// 	// }

@@ -6,12 +6,14 @@ var (
 	ErrInvalidTitle = errors.New("Title field cannot be empty or null")
 
 	ErrInvalidBody = errors.New("Body field cannot be empty or null")
+
+	ErrNoID = errors.New("ID field cannot be empty or null")
 )
 
 // Actions implements methods for getting todos
 type Actions interface {
 	AllTodos() ([]*Todo, error)
-	// GetTodoByID(id string) (*Todo, error)
+	GetTodoByID(id string) (*Todo, error)
 	// AddTodo(todo *Todo) error
 	// UpdateTodo(todo *Todo) error
 	// DeleteTodo(id string) error

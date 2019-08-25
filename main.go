@@ -27,29 +27,11 @@ func main() {
 	handler := handler.NewTodoHandler(database)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", handler.HandleGetTodos).Methods("GET")
+	r.HandleFunc("/todo", handler.HandleGetTodos).Methods("GET")
+	r.HandleFunc("/todo/{id:[0-9]+}", handler.HandleGetTodoByID).Methods("GET")
+	r.HandleFunc("/todo", handler.HandleAddTodo).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
-
-// func (api *API) getTodo(w http.ResponseWriter, r *http.Request) {
-
-// func (api *API) postTodo(w http.ResponseWriter, r *http.Request) {
-// 	log.Printf("Incoming POST request on: %s", r.URL.Path)
-// 	newTodo := &todo{}
-// 	err := json.NewDecoder(r.Body).Decode(newTodo)
-// 	if err != nil {
-// 		log.Printf("Error decoding post Todo: %s", err.Error())
-// 		w.WriteHeader(http.StatusBadRequest)
-// 	}
-// 	sqlStatement := `
-// 	INSERT INTO todo_list (title, body) VALUES ($1, $2);`
-
-// 	_, err = api.DB.Exec(sqlStatement, newTodo.Title, newTodo.Body)
-// 	if err != nil {
-// 		log.Printf("Error performing INSERT statement: %s", err.Error())
-// 	}
-// 	w.WriteHeader(http.StatusCreated)
-// }
 
 // func (api *API) delTodo(w http.ResponseWriter, r *http.Request) {
 // 	log.Printf("Incoming DELETE request on: %s", r.URL.Path)

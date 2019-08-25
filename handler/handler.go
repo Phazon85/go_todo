@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/phazon85/go_todo/services"
 )
 
@@ -42,3 +44,17 @@ func (t *TodoHandler) HandleGetTodos(w http.ResponseWriter, r *http.Request) {
 
 	encodeJSON(w, res)
 }
+
+func (t *TodoHandler) HandleGetTodoByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	res, err := t.Service.GetTodoByID(vars["id"])
+	if err != nil {
+		log.Printf("error handling getting Todo by ID: %s", err.Error())
+	}
+
+	encodeJSON(w, res)
+}
+
+// func (t *TodoHandler) HandleAddTodo(w http.ResponseWriter, r *http.Request) error {
+
+// }
