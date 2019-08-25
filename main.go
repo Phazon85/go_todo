@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
-	"fmt"
+	"log"
+	"net/http"
 
+	"github.com/gorilla/mux"
+	"github.com/phazon85/go_todo/handler"
 	"github.com/phazon85/go_todo/services"
 
 	_ "github.com/lib/pq"
@@ -20,37 +22,16 @@ type Todo struct {
 	Body  string `json:"Body"`
 }
 
-func NewTodoHandler(svc services.Actions)
-
 func main() {
-
-	// // starting HTTP server
-	// http.HandleFunc("/todo", api.rootHandler)
-	// http.ListenAndServe(":8080", nil)
 	database := services.DBInit(configFile)
-	fmt.Println(services..PSQLService.AllTodos())
+	handler := handler.NewTodoHandler(database)
+
 	r := mux.NewRouter()
+	r.HandleFunc("/", handler.HandleGetTodos).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 // func (api *API) getTodo(w http.ResponseWriter, r *http.Request) {
-// 	log.Printf("Incoming GET request on: %s", r.URL.Path)
-
-// 	// // Single select statement
-// 	// newTodo := &todo{}
-// 	// value := r.Header.Get("ID")
-// 	// singleStatment := `
-// 	// SELECT id, title, body FROM todo_list WHERE id=$1;
-// 	// `
-// 	// row := api.DB.QueryRow(singleStatment, value)
-// 	// switch err := row.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body); err {
-// 	// case sql.ErrNoRows:
-// 	// 	log.Printf("Error: No rows returned")
-// 	// case nil:
-// 	// 	fmt.Println(newTodo.ID, newTodo.Title, newTodo.Body)
-// 	// default:
-// 	// 	log.Printf("Error with GET sql query: %s", err.Error())
-// 	// }
 
 // func (api *API) postTodo(w http.ResponseWriter, r *http.Request) {
 // 	log.Printf("Incoming POST request on: %s", r.URL.Path)

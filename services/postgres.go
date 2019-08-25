@@ -12,7 +12,7 @@ import (
 
 const (
 	driverName = "postgres"
-	psqlInfo   = "host=%s port=%d user=%s password=%s dbname=%s ssqlmode=disable"
+	psqlInfo   = "host=%s port=%d user=%s password=%s dbname=%s sslmode=disable"
 )
 
 //PSQLService implements the Actions interface and carries the sql connection info
@@ -65,26 +65,33 @@ func (s *PSQLService) AllTodos() ([]*Todo, error) {
 	return allTodo, err
 }
 
-// 	// Get all todos
-// 	allTodo := []*todo{}
-// 	multiStatement := `SELECT id, title, body FROM todo_list;
-// 		`
-// 	rows, err := api.DB.Query(multiStatement)
-// 	if err != nil {
-// 		log.Printf("Error with GET multirow sql query: %s", err.Error())
+// func (s *PSQLService) GetTodoByID(id) (*Todo, error) {
+// 	newTodo := &Todo{}
+// 	row := s.DB.QueryRow(todoByID, id)
+// 	switch err := row.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body); err {
+// 	case sql.ErrNoRows:
+// 		return nil, err
+// 	case nil:
+// 		return newTodo, nil
+// 	default:
+// 		return nil, err
 // 	}
-// 	defer rows.Close()
-// 	for rows.Next() {
-// 		newTodo := &todo{}
-// 		err = rows.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body)
-// 		if err != nil {
-// 			log.Printf("Error scanning multi SQL rows into newTodo: %s", err.Error())
-// 		}
-// 		allTodo = append(allTodo, newTodo)
-// 	}
-// 	err = rows.Err()
-// 	if err != nil {
-// 		log.Printf("Error during iterating through sql reponse: %s", err.Error())
-// 	}
-// 	json.NewEncoder(w).Encode(allTodo)
 // }
+
+// 	log.Printf("Incoming GET request on: %s", r.URL.Path)
+
+// 	// // Single select statement
+// 	// newTodo := &todo{}
+// 	// value := r.Header.Get("ID")
+// 	// singleStatment := `
+// 	// SELECT id, title, body FROM todo_list WHERE id=$1;
+// 	// `
+// 	// row := api.DB.QueryRow(singleStatment, value)
+// 	// switch err := row.Scan(&newTodo.ID, &newTodo.Title, &newTodo.Body); err {
+// 	// case sql.ErrNoRows:
+// 	// 	log.Printf("Error: No rows returned")
+// 	// case nil:
+// 	// 	fmt.Println(newTodo.ID, newTodo.Title, newTodo.Body)
+// 	// default:
+// 	// 	log.Printf("Error with GET sql query: %s", err.Error())
+// 	// }

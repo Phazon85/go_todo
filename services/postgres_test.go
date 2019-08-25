@@ -14,7 +14,3 @@ func TestDBInit(t *testing.T) {
 	db := DBInit(configFile)
 	assert.NotNil(t, db)
 }
-
-func TestAllTodos(t *testing.T) {
-
-}
