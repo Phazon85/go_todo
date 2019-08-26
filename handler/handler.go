@@ -14,14 +14,14 @@ type TodoHandler struct {
 	Service services.Actions
 }
 
-func decodeAndValidate(r *http.Request, v services.Validation) error {
-	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
-		return err
-	}
-	defer r.Body.Close()
+// func decodeAndValidate(r *http.Request, v services.Validation) error {
+// 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
+// 		return err
+// 	}
+// 	defer r.Body.Close()
 
-	return nil
-}
+// 	return Validate()
+// }
 
 func encodeJSON(w http.ResponseWriter, v interface{}) {
 	if err := json.NewEncoder(w).Encode(v); err != nil {
@@ -55,6 +55,16 @@ func (t *TodoHandler) HandleGetTodoByID(w http.ResponseWriter, r *http.Request) 
 	encodeJSON(w, res)
 }
 
-// func (t *TodoHandler) HandleAddTodo(w http.ResponseWriter, r *http.Request) error {
+func (t *TodoHandler) HandleAddTodo(w http.ResponseWriter, r *http.Request) {
+	newTodo := &services.Todo{}
+	err := json.NewDecoder(r.Body).Decode(newTodo)
+	if err != nil {
+		log.Printf("Error decoding post Todo: %s", err.Error())
+	}
+	err = t.Service.AddTodo(newTodo)
+	if err != nil {
+		log.Printf("Error adding todo to DB: %s", err.Error())
+	}
 
-// }
+	w.WriteHeader(http.StatusCreated)
+}

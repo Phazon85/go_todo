@@ -15,13 +15,6 @@ const (
 	configFile = "dev.yaml"
 )
 
-//Todo holds json fields
-type Todo struct {
-	ID    string `json:"ID"`
-	Title string `json:"Title"`
-	Body  string `json:"Body"`
-}
-
 func main() {
 	database := services.DBInit(configFile)
 	handler := handler.NewTodoHandler(database)
