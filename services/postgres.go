@@ -99,13 +99,3 @@ func (s *PSQLService) DeleteTodo(id string) error {
 	_, err := s.DB.Exec(deleteTodo, id)
 	return err
 }
-
-// func (api *API) delTodo(w http.ResponseWriter, r *http.Request) {
-// 	log.Printf("Incoming DELETE request on: %s", r.URL.Path)
-// 	deleteStatment := `
-// 	DELETE FROM todo_list WHERE id = $1;`
-// 	value := r.Header.Get("ID")
-// 	_, err := api.DB.Exec(deleteStatment, value)
-
-// 	w.WriteHeader(http.StatusOK)
-// }

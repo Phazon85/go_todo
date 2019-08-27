@@ -10,6 +10,7 @@ import (
 	"github.com/phazon85/go_todo/services"
 )
 
+//TodoHandler implements the Actions Interface
 type TodoHandler struct {
 	Service services.Actions
 }
@@ -29,13 +30,14 @@ func encodeJSON(w http.ResponseWriter, v interface{}) {
 	}
 }
 
-// NewTodoHandler returns a new
+// NewTodoHandler returns a new TodoHandler service
 func NewTodoHandler(svc services.Actions) *TodoHandler {
 	return &TodoHandler{
 		Service: svc,
 	}
 }
 
+//HandleGetTodos gets all todos in DB
 func (t *TodoHandler) HandleGetTodos(w http.ResponseWriter, r *http.Request) {
 	res, err := t.Service.AllTodos()
 	if err != nil {
@@ -45,6 +47,7 @@ func (t *TodoHandler) HandleGetTodos(w http.ResponseWriter, r *http.Request) {
 	encodeJSON(w, res)
 }
 
+//HandleGetTodoByID will queries a Todo by ID
 func (t *TodoHandler) HandleGetTodoByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	res, err := t.Service.GetTodoByID(vars["id"])
@@ -55,6 +58,7 @@ func (t *TodoHandler) HandleGetTodoByID(w http.ResponseWriter, r *http.Request) 
 	encodeJSON(w, res)
 }
 
+//HandleAddTodo takes a new todo and inserts into DB
 func (t *TodoHandler) HandleAddTodo(w http.ResponseWriter, r *http.Request) {
 	newTodo := &services.Todo{}
 	err := json.NewDecoder(r.Body).Decode(newTodo)
@@ -69,6 +73,7 @@ func (t *TodoHandler) HandleAddTodo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+//HandleUpdateTodo replaces values in todo by ID
 func (t *TodoHandler) HandleUpdateTodo(w http.ResponseWriter, r *http.Request) {
 	newTodo := &services.Todo{}
 	err := json.NewDecoder(r.Body).Decode(newTodo)
@@ -83,6 +88,7 @@ func (t *TodoHandler) HandleUpdateTodo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+//HandleDeleteTodo will delete a todo by ID
 func (t *TodoHandler) HandleDeleteTodo(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	err := t.Service.DeleteTodo(vars["id"])
