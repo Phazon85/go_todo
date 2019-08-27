@@ -82,25 +82,30 @@ func (s *PSQLService) GetTodoByID(id string) (*Todo, error) {
 	}
 }
 
+//AddTodo adds a new todo into the DB
 func (s *PSQLService) AddTodo(todo *Todo) error {
 	_, err := s.DB.Exec(createTodo, todo.Title, todo.Body)
 	return err
 }
 
-// func (api *API) postTodo(w http.ResponseWriter, r *http.Request) {
-// 	log.Printf("Incoming POST request on: %s", r.URL.Path)
-// 	newTodo := &todo{}
-// 	err := json.NewDecoder(r.Body).Decode(newTodo)
-// 	if err != nil {
-// 		log.Printf("Error decoding post Todo: %s", err.Error())
-// 		w.WriteHeader(http.StatusBadRequest)
-// 	}
-// 	sqlStatement := `
-// 	INSERT INTO todo_list (title, body) VALUES ($1, $2);`
+//UpdateTodo updates specified Todo by ID
+func (s *PSQLService) UpdateTodo(todo *Todo) error {
+	_, err := s.DB.Exec(updateTodo, todo.ID, todo.Title, todo.Body)
+	return err
+}
 
-// 	_, err = api.DB.Exec(sqlStatement, newTodo.Title, newTodo.Body)
-// 	if err != nil {
-// 		log.Printf("Error performing INSERT statement: %s", err.Error())
-// 	}
-// 	w.WriteHeader(http.StatusCreated)
+//DeleteTodo deletes todo by id
+func (s *PSQLService) DeleteTodo(id string) error {
+	_, err := s.DB.Exec(deleteTodo, id)
+	return err
+}
+
+// func (api *API) delTodo(w http.ResponseWriter, r *http.Request) {
+// 	log.Printf("Incoming DELETE request on: %s", r.URL.Path)
+// 	deleteStatment := `
+// 	DELETE FROM todo_list WHERE id = $1;`
+// 	value := r.Header.Get("ID")
+// 	_, err := api.DB.Exec(deleteStatment, value)
+
+// 	w.WriteHeader(http.StatusOK)
 // }

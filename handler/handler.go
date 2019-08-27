@@ -14,14 +14,14 @@ type TodoHandler struct {
 	Service services.Actions
 }
 
-// func decodeAndValidate(r *http.Request, v services.Validation) error {
-// 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
-// 		return err
-// 	}
-// 	defer r.Body.Close()
+func decodeAndValidate(r *http.Request, v services.Validation) error {
+	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
+		return err
+	}
+	defer r.Body.Close()
 
-// 	return Validate()
-// }
+	return v.Validate()
+}
 
 func encodeJSON(w http.ResponseWriter, v interface{}) {
 	if err := json.NewEncoder(w).Encode(v); err != nil {
@@ -67,4 +67,28 @@ func (t *TodoHandler) HandleAddTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (t *TodoHandler) HandleUpdateTodo(w http.ResponseWriter, r *http.Request) {
+	newTodo := &services.Todo{}
+	err := json.NewDecoder(r.Body).Decode(newTodo)
+	if err != nil {
+		log.Printf("Error decoding post Todo: %s", err.Error())
+	}
+	err = t.Service.UpdateTodo(newTodo)
+	if err != nil {
+		log.Printf("Error Updating Todo: %s", err.Error())
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (t *TodoHandler) HandleDeleteTodo(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	err := t.Service.DeleteTodo(vars["id"])
+	if err != nil {
+		log.Printf("Error deleteing Todo: %s", err.Error())
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

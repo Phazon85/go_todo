@@ -15,8 +15,8 @@ type Actions interface {
 	AllTodos() ([]*Todo, error)
 	GetTodoByID(id string) (*Todo, error)
 	AddTodo(todo *Todo) error
-	// UpdateTodo(todo *Todo) error
-	// DeleteTodo(id string) error
+	UpdateTodo(todo *Todo) error
+	DeleteTodo(id string) error
 }
 
 //Todo defines what a todo entry contains
@@ -27,7 +27,7 @@ type Todo struct {
 }
 
 type Validation interface {
-	Validate()
+	Validate() error
 }
 
 func (t Todo) Validate() error {
