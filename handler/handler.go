@@ -61,7 +61,7 @@ func (t *TodoHandler) HandleGetTodoByID(w http.ResponseWriter, r *http.Request) 
 //HandleAddTodo takes a new todo and inserts into DB
 func (t *TodoHandler) HandleAddTodo(w http.ResponseWriter, r *http.Request) {
 	newTodo := &services.Todo{}
-	err := json.NewDecoder(r.Body).Decode(newTodo)
+	err := decodeAndValidate(r, newTodo)
 	if err != nil {
 		log.Printf("Error decoding post Todo: %s", err.Error())
 	}
@@ -76,7 +76,7 @@ func (t *TodoHandler) HandleAddTodo(w http.ResponseWriter, r *http.Request) {
 //HandleUpdateTodo replaces values in todo by ID
 func (t *TodoHandler) HandleUpdateTodo(w http.ResponseWriter, r *http.Request) {
 	newTodo := &services.Todo{}
-	err := json.NewDecoder(r.Body).Decode(newTodo)
+	err := decodeAndValidate(r, newTodo)
 	if err != nil {
 		log.Printf("Error decoding post Todo: %s", err.Error())
 	}
